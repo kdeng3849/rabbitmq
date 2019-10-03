@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 def listen(request):
     data = json.loads(request.body.decode('utf-8'))
     keys = data['keys']
-    # msg = ""
     response = {}
 
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -28,9 +27,8 @@ def listen(request):
     def callback(ch, method, properties, body):
         print(" [x] %r:%r" % (method.routing_key, body))
         response['msg'] = body.decode('utf-8')
-        # channel.stop_consuming()
-        return response and channel.stop_consuming()
-        # return msg
+        channel.stop_consuming()
+        return response
 
 
     channel.basic_consume(
@@ -39,8 +37,6 @@ def listen(request):
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
 
-    # if msg:
-        # channel.stop_consuming()
     return JsonResponse(response)
 
 
